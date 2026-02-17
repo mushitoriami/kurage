@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from textwrap import indent
 
 import anthropic
@@ -8,6 +9,17 @@ load_dotenv()
 
 
 def main():
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--thinking",
+        "-t",
+        action="store_true",
+        default=False,
+        help="Enable extended thinking",
+    )
+
+    args = parser.parse_args()
+
     client = anthropic.Anthropic()
     messages = []
     while True:
@@ -17,7 +29,9 @@ def main():
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=8192,
-            thinking={"type": "enabled", "budget_tokens": 4096},
+            thinking={"type": "enabled", "budget_tokens": 4096}
+            if args.thinking
+            else {"type": "disabled"},
             messages=messages,
         )
         for block in response.content:
