@@ -21,6 +21,9 @@ def main():
             messages=messages,
         )
         for block in response.content:
+            if block.type == "thinking":
+                print("\nAssistant [Thinking]:\n")
+                print(indent(block.thinking, "  | ", predicate=(lambda x: True)))
             if block.type == "text":
                 print("\nAssistant:\n")
                 print(indent(block.text, "  | ", predicate=(lambda x: True)))
