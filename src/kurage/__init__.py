@@ -17,7 +17,8 @@ def main():
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929", max_tokens=1024, messages=messages
         )
-        assistant_message = response.content[0].text
-        print("\nAssistant:\n")
-        print(indent(assistant_message, "  | ", predicate=(lambda x: True)))
+        for block in response.content:
+            if block.type == "text":
+                print("\nAssistant:\n")
+                print(indent(block.text, "  | ", predicate=(lambda x: True)))
         messages.append({"role": "assistant", "content": response.content})
