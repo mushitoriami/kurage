@@ -9,7 +9,7 @@ def main():
     client = anthropic.Anthropic()
     messages = []
     while True:
-        user_input = prompt("User: ")
+        user_input = prompt("User: ", multiline=True)
         messages.append({"role": "user", "content": user_input})
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929", max_tokens=1024, messages=messages
