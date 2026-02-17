@@ -20,4 +20,4 @@ def main():
         assistant_message = response.content[0].text
         print("\nAssistant:\n")
         print(indent(assistant_message, "  | ", predicate=(lambda x: True)))
-        messages.append({"role": "assistant", "content": assistant_message})
+        messages.append({"role": "assistant", "content": response.content})
