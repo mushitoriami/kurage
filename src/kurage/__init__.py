@@ -15,7 +15,10 @@ def main():
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
         messages.append({"role": "user", "content": user_input})
         response = client.messages.create(
-            model="claude-sonnet-4-5-20250929", max_tokens=1024, messages=messages
+            model="claude-sonnet-4-5-20250929",
+            max_tokens=8192,
+            thinking={"type": "enabled", "budget_tokens": 4096},
+            messages=messages,
         )
         for block in response.content:
             if block.type == "text":
