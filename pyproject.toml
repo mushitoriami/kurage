@@ -23,3 +23,16 @@ dev = [
   "pyproject-fmt>=2.16,<2.17",
   "ruff>=0.15.1",
 ]
+
+[tool.tox]
+requires = [ "tox>=4.19" ]
+env_list = [ "lint", "format", "format_pyproject" ]
+env.format.description = "Check format"
+env.format.commands = [ [ "ruff", "format", "--check" ] ]
+env.format_pyproject.description = "Check pyproject.toml format"
+env.format_pyproject.commands = [ [ "pyproject-fmt", "--check", "pyproject.toml" ] ]
+env.lint.description = "Lint"
+env.lint.commands = [ [ "ruff", "check" ] ]
+env.type.description = "Run type checks"
+env.type.commands = [ [ "mypy", "." ] ]
+env_run_base.dependency_groups = [ "dev" ]
