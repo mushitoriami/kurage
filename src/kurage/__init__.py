@@ -15,7 +15,24 @@ def construct_context(roles, texts):
     return [{"role": role, "content": text} for role, text in zip(cycle(roles), texts)]
 
 
-def construct_system_and_messages(texts, system_prompt, enable_objective):
+def construct_system_and_messages(
+    texts, system_prompt, character_setting, enable_objective
+):
+    if character_setting is not None:
+        context = json.dumps(construct_context(["Q", "P"], texts))
+        setting = json.dumps(character_setting)
+        instruction = f"""
+以下は、架空のキャラクターPとQの会話履歴です。
+
+{context}
+
+この会話に続く、Pの発話を生成してください。出力は生成した発話のみとし、それ以外は一切出力しないでください。
+
+また、PとQのキャラクター設定は以下とします。
+
+{setting}
+"""
+        return "", [{"role": "user", "content": instruction}]
     if enable_objective:
         context = json.dumps(construct_context(["user", "assistant"], texts))
         system = json.dumps(system_prompt)
@@ -73,12 +90,15 @@ def main():
     client = anthropic.Anthropic()
     texts = []
     system_prompt = Path(args.system).read_text() if args.system is not None else ""
+    character_setting = (
+        Path(args.character).read_text() if args.character is not None else None
+    )
     while True:
         print("\nUser:\n")
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
         texts.append(user_input)
         system, messages = construct_system_and_messages(
-            texts, system_prompt, args.objective
+            texts, system_prompt, character_setting, args.objective
         )
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
