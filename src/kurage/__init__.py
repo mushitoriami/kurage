@@ -19,6 +19,13 @@ def main():
         help="Enable extended thinking",
     )
     parser.add_argument(
+        "--objective",
+        "-o",
+        action="store_true",
+        default=False,
+        help="Enable objective mode",
+    )
+    parser.add_argument(
         "--system",
         "-s",
         help="File containing system prompt",
