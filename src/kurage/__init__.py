@@ -11,16 +11,13 @@ from prompt_toolkit import prompt
 load_dotenv()
 
 
-def construct_context(texts):
-    return [
-        {"role": role, "content": text}
-        for role, text in zip(cycle(["user", "assistant"]), texts)
-    ]
+def construct_context(roles, texts):
+    return [{"role": role, "content": text} for role, text in zip(cycle(roles), texts)]
 
 
 def construct_system_and_messages(texts, system_prompt, enable_objective):
     if enable_objective:
-        context = json.dumps(construct_context(texts))
+        context = json.dumps(construct_context(["user", "assistant"], texts))
         system = json.dumps(system_prompt)
         instruction = f"""
 以下は、ユーザとClaudeの会話履歴です。
@@ -35,7 +32,7 @@ def construct_system_and_messages(texts, system_prompt, enable_objective):
 """
         return "", [{"role": "user", "content": instruction}]
     else:
-        return system_prompt, construct_context(texts)
+        return system_prompt, construct_context(["user", "assistant"], texts)
 
 
 def main():
