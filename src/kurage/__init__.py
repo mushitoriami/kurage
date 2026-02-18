@@ -55,6 +55,11 @@ def main():
         help="Enable objective mode",
     )
     parser.add_argument(
+        "--character",
+        "-c",
+        help="File containing character setting (enable conversation mode)",
+    )
+    parser.add_argument(
         "--system",
         "-s",
         help="File containing system prompt",
