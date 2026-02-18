@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from itertools import cycle
 from pathlib import Path
 from textwrap import indent
 
@@ -7,6 +8,17 @@ from dotenv import load_dotenv
 from prompt_toolkit import prompt
 
 load_dotenv()
+
+
+def construct_context(texts):
+    return [
+        {"role": role, "content": text}
+        for role, text in zip(cycle(["user", "assistant"]), texts)
+    ]
+
+
+def construct_system_and_messages(texts, system_prompt):
+    return system_prompt, construct_context(texts)
 
 
 def main():
@@ -40,16 +52,17 @@ def main():
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
-    messages = []
+    texts = []
     system_prompt = Path(args.system).read_text() if args.system is not None else ""
     while True:
         print("\nUser:\n")
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
-        messages.append({"role": "user", "content": user_input})
+        texts.append(user_input)
+        system, messages = construct_system_and_messages(texts, system_prompt)
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=int(args.max_tokens),
-            system=system_prompt,
+            system=system,
             thinking={"type": "enabled", "budget_tokens": int(args.budget_tokens)}
             if args.thinking
             else {"type": "disabled"},
@@ -62,4 +75,4 @@ def main():
             if block.type == "text":
                 print("\nAssistant:\n")
                 print(indent(block.text, "  | ", predicate=(lambda x: True)))
-                messages.append({"role": "assistant", "content": block.text})
+                texts.append(block.text)
