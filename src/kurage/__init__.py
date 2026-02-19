@@ -23,6 +23,13 @@ def main():
         "-s",
         help="File containing system prompt",
     )
+    parser.add_argument("--max-tokens", "-m", default=2048, help="Max tokens")
+    parser.add_argument(
+        "--budget-tokens",
+        "-b",
+        default=1024,
+        help="Budget tokens (for extended thinking)",
+    )
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
@@ -34,9 +41,9 @@ def main():
         messages.append({"role": "user", "content": user_input})
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
-            max_tokens=8192,
+            max_tokens=int(args.max_tokens),
             system=system_prompt,
-            thinking={"type": "enabled", "budget_tokens": 4096}
+            thinking={"type": "enabled", "budget_tokens": int(args.budget_tokens)}
             if args.thinking
             else {"type": "disabled"},
             messages=messages,
