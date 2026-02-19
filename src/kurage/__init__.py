@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from pathlib import Path
 from textwrap import indent
 
 import anthropic
@@ -17,11 +18,16 @@ def main():
         default=False,
         help="Enable extended thinking",
     )
-
+    parser.add_argument(
+        "--system",
+        "-s",
+        help="File containing system prompt",
+    )
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
     messages = []
+    system_prompt = Path(args.system).read_text() if args.system is not None else ""
     while True:
         print("\nUser:\n")
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
@@ -29,6 +35,7 @@ def main():
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=8192,
+            system=system_prompt,
             thinking={"type": "enabled", "budget_tokens": 4096}
             if args.thinking
             else {"type": "disabled"},
