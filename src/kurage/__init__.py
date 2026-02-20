@@ -1,3 +1,4 @@
+import json
 from argparse import ArgumentParser
 from itertools import cycle
 from pathlib import Path
@@ -17,8 +18,24 @@ def construct_context(texts):
     ]
 
 
-def construct_system_and_messages(texts, system_prompt):
-    return system_prompt, construct_context(texts)
+def construct_system_and_messages(texts, system_prompt, enable_objective):
+    if enable_objective:
+        context = json.dumps(construct_context(texts))
+        system = json.dumps(system_prompt)
+        instruction = f"""
+以下は、ユーザとClaudeの会話履歴です。
+
+{context}
+
+この会話に続く、Claudeの適切な応答を生成してください。出力は生成した応答のみとし、それ以外は一切出力しないでください。
+
+ただし、Claudeには以下のシステムプロンプトが与えられているとします。
+
+{system}
+"""
+        return "", [{"role": "user", "content": instruction}]
+    else:
+        return system_prompt, construct_context(texts)
 
 
 def main():
@@ -58,7 +75,9 @@ def main():
         print("\nUser:\n")
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
         texts.append(user_input)
-        system, messages = construct_system_and_messages(texts, system_prompt)
+        system, messages = construct_system_and_messages(
+            texts, system_prompt, args.objective
+        )
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=int(args.max_tokens),
