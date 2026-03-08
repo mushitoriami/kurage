@@ -27,7 +27,8 @@ The following is a conversation history between a user and Claude.
 
 {context}
 
-Generate an appropriate response from Claude that continues this conversation. Output only the generated response and nothing else.
+Generate an appropriate response from Claude that continues this conversation.
+Output only the generated response and nothing else.
 
 Note that Claude is given the following system prompt:
 
