@@ -10,15 +10,12 @@ from prompt_toolkit import prompt
 load_dotenv()
 
 
-def construct_context(texts):
-    return [
-        {"role": role, "content": text}
-        for role, text in zip(cycle(["user", "assistant"]), texts)
-    ]
+def construct_context(roles, texts):
+    return [{"role": role, "content": text} for role, text in zip(cycle(roles), texts)]
 
 
 def construct_system_and_messages(texts, system_prompt):
-    return system_prompt, construct_context(texts)
+    return system_prompt, construct_context(["user", "assistant"], texts)
 
 
 def main():
