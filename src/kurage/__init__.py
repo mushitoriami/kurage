@@ -1,3 +1,4 @@
+import json
 from argparse import ArgumentParser
 from itertools import cycle
 from pathlib import Path
@@ -17,8 +18,24 @@ def construct_context(texts):
     ]
 
 
-def construct_system_and_messages(texts, system_prompt):
-    return system_prompt, construct_context(texts)
+def construct_system_and_messages(texts, system_prompt, enable_objective):
+    if enable_objective:
+        context = json.dumps(construct_context(texts))
+        system = json.dumps(system_prompt)
+        instruction = f"""
+The following is a conversation history between a user and Claude.
+
+{context}
+
+Generate an appropriate response from Claude that continues this conversation. Output only the generated response and nothing else.
+
+Note that Claude is given the following system prompt:
+
+{system}
+"""
+        return "", [{"role": "user", "content": instruction}]
+    else:
+        return system_prompt, construct_context(texts)
 
 
 def main():
@@ -58,7 +75,9 @@ def main():
         print("\nUser:\n")
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
         texts.append(user_input)
-        system, messages = construct_system_and_messages(texts, system_prompt)
+        system, messages = construct_system_and_messages(
+            texts, system_prompt, args.objective
+        )
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=int(args.max_tokens),
