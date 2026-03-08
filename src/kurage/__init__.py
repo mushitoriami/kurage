@@ -55,4 +55,4 @@ def main():
             if block.type == "text":
                 print("\nAssistant:\n")
                 print(indent(block.text, "  | ", predicate=(lambda x: True)))
-        messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "assistant", "content": block.text})
