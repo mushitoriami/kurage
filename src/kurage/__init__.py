@@ -4,6 +4,7 @@ from pathlib import Path
 from textwrap import indent
 
 import anthropic
+import json
 from dotenv import load_dotenv
 from prompt_toolkit import prompt
 
@@ -14,8 +15,25 @@ def construct_context(roles, texts):
     return [{"role": role, "content": text} for role, text in zip(cycle(roles), texts)]
 
 
-def construct_system_and_messages(texts, system_prompt):
-    return system_prompt, construct_context(["user", "assistant"], texts)
+def construct_system_and_messages(texts, system_prompt, character_setting):
+    if character_setting is not None:
+        context = json.dumps(construct_context(["Q", "P"], texts))
+        setting = json.dumps(character_setting)
+        instruction = f"""
+The following is a conversation history between two fictional characters P and Q.
+
+{context}
+
+Generate P's next utterance that continues this conversation.
+Output only the generated utterance and nothing else.
+
+The character settings for P and Q are as follows:
+
+{setting}
+"""
+        return "", [{"role": "user", "content": instruction}]
+    else:
+        return system_prompt, construct_context(["user", "assistant"], texts)
 
 
 def main():
@@ -49,11 +67,16 @@ def main():
     client = anthropic.Anthropic()
     texts = []
     system_prompt = Path(args.system).read_text() if args.system is not None else ""
+    character_setting = (
+        Path(args.character).read_text() if args.character is not None else None
+    )
     while True:
         print("\nUser:\n")
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
         texts.append(user_input)
-        system, messages = construct_system_and_messages(texts, system_prompt)
+        system, messages = construct_system_and_messages(
+            texts, system_prompt, character_setting
+        )
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=int(args.max_tokens),
