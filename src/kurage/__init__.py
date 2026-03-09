@@ -1,10 +1,10 @@
+import json
 from argparse import ArgumentParser
 from itertools import cycle
 from pathlib import Path
 from textwrap import indent
 
 import anthropic
-import json
 from dotenv import load_dotenv
 from prompt_toolkit import prompt
 
