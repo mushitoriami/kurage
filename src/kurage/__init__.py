@@ -2,7 +2,7 @@ import json
 from argparse import ArgumentParser
 from itertools import cycle
 from pathlib import Path
-from textwrap import indent
+from textwrap import dedent, indent
 
 import anthropic
 from dotenv import load_dotenv
@@ -19,18 +19,18 @@ def construct_system_and_messages(texts, system_prompt, character_setting):
     if character_setting is not None:
         context = json.dumps(construct_context(["Q", "P"], texts))
         setting = json.dumps(character_setting)
-        instruction = f"""
-The following is a conversation history between two fictional characters P and Q.
+        instruction = dedent(f"""
+            The following is a conversation history between two fictional characters.
 
-{context}
+            {context}
 
-Generate P's next utterance that continues this conversation.
-Output only the generated utterance and nothing else.
+            Generate P's next utterance that continues this conversation.
+            Output only the generated utterance and nothing else.
 
-The character settings for P and Q are as follows:
+            The character settings for P and Q are as follows:
 
-{setting}
-"""
+            {setting}
+            """)
         return "", [{"role": "user", "content": instruction}]
     else:
         return system_prompt, construct_context(["user", "assistant"], texts)
