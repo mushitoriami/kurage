@@ -1,12 +1,39 @@
+import json
 from argparse import ArgumentParser
+from itertools import cycle
 from pathlib import Path
-from textwrap import indent
+from textwrap import dedent, indent
 
 import anthropic
 from dotenv import load_dotenv
 from prompt_toolkit import prompt
 
 load_dotenv()
+
+
+def construct_context(roles, texts):
+    return [{"role": role, "content": text} for role, text in zip(cycle(roles), texts)]
+
+
+def construct_system_and_messages(texts, system_prompt, character_setting):
+    if character_setting is not None:
+        context = json.dumps(construct_context(["Q", "P"], texts))
+        setting = json.dumps(character_setting)
+        instruction = dedent(f"""
+            The following is a conversation history between two fictional characters.
+
+            {context}
+
+            Generate P's next utterance that continues this conversation.
+            Output only the generated utterance and nothing else.
+
+            The character settings for P and Q are as follows:
+
+            {setting}
+            """)
+        return "", [{"role": "user", "content": instruction}]
+    else:
+        return system_prompt, construct_context(["user", "assistant"], texts)
 
 
 def main():
@@ -17,6 +44,11 @@ def main():
         action="store_true",
         default=False,
         help="Enable extended thinking",
+    )
+    parser.add_argument(
+        "--character",
+        "-c",
+        help="File containing character setting (enable conversation mode)",
     )
     parser.add_argument(
         "--system",
@@ -33,16 +65,22 @@ def main():
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
-    messages = []
+    texts = []
     system_prompt = Path(args.system).read_text() if args.system is not None else ""
+    character_setting = (
+        Path(args.character).read_text() if args.character is not None else None
+    )
     while True:
         print("\nUser:\n")
         user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
-        messages.append({"role": "user", "content": user_input})
+        texts.append(user_input)
+        system, messages = construct_system_and_messages(
+            texts, system_prompt, character_setting
+        )
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=int(args.max_tokens),
-            system=system_prompt,
+            system=system,
             thinking={"type": "enabled", "budget_tokens": int(args.budget_tokens)}
             if args.thinking
             else {"type": "disabled"},
@@ -55,4 +93,4 @@ def main():
             if block.type == "text":
                 print("\nAssistant:\n")
                 print(indent(block.text, "  | ", predicate=(lambda x: True)))
-        messages.append({"role": "assistant", "content": response.content})
+                texts.append(block.text)
