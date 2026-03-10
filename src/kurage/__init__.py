@@ -7,6 +7,20 @@ from textwrap import dedent, indent
 import anthropic
 from dotenv import load_dotenv
 from prompt_toolkit import prompt
+from prompt_toolkit.key_binding import KeyBindings
+
+kb = KeyBindings()
+
+
+@kb.add("escape", "[", "1", "3", ";", "2", "u")
+def _(event):
+    event.current_buffer.insert_text("\n")
+
+
+@kb.add("enter")
+def _(event):
+    event.current_buffer.validate_and_handle()
+
 
 load_dotenv()
 
@@ -72,7 +86,9 @@ def main():
     )
     while True:
         print("\nUser:\n")
-        user_input = prompt("  | ", multiline=True, prompt_continuation="  | ")
+        user_input = prompt(
+            "  | ", key_bindings=kb, multiline=True, prompt_continuation="  | "
+        )
         texts.append(user_input)
         system, messages = construct_system_and_messages(
             texts, system_prompt, character_setting
