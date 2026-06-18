@@ -12,7 +12,7 @@ from prompt_toolkit.key_binding import KeyBindings
 kb = KeyBindings()
 
 
-@kb.add("escape", "[", "1", "3", ";", "2", "u")
+@kb.add("c-j")
 def _(event):
     event.current_buffer.insert_text("\n")
 
