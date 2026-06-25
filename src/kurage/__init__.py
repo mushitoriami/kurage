@@ -5,7 +5,6 @@ from pathlib import Path
 from textwrap import dedent, indent
 
 import anthropic
-from dotenv import load_dotenv
 from prompt_toolkit import prompt
 from prompt_toolkit.key_binding import KeyBindings
 
@@ -20,9 +19,6 @@ def _(event):
 @kb.add("enter")
 def _(event):
     event.current_buffer.validate_and_handle()
-
-
-load_dotenv()
 
 
 def construct_context(roles, texts):
