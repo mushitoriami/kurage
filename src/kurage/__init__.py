@@ -36,8 +36,6 @@ def construct_messages(texts, character_setting):
         Generate P's next utterance that continues this conversation.
         Output only the generated utterance and nothing else.
 
-        The character settings for P and Q are as follows:
-
         {setting}
         """)
     return [{"role": "user", "content": instruction}]
@@ -53,10 +51,16 @@ def main():
         help="Enable extended thinking",
     )
     parser.add_argument(
-        "--character",
-        "-c",
+        "--assistant",
+        "-a",
         required=True,
-        help="File containing character setting",
+        help="File containing character setting for assistant",
+    )
+    parser.add_argument(
+        "--user",
+        "-u",
+        required=True,
+        help="File containing character setting for user",
     )
     parser.add_argument("--max-tokens", "-m", default=2048, help="Max tokens")
     parser.add_argument(
@@ -69,7 +73,17 @@ def main():
 
     client = anthropic.Anthropic()
     texts = []
-    character_setting = Path(args.character).read_text()
+    character_setting_p = Path(args.assistant).read_text()
+    character_setting_q = Path(args.user).read_text()
+    character_setting = dedent(f"""
+        The character setting for P is as follows:
+
+        {character_setting_p}
+
+        The character setting for Q is as follows:
+
+        {character_setting_q}
+    """)
     while True:
         print("\nUser:\n")
         try:
