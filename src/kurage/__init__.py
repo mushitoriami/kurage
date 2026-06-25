@@ -60,11 +60,6 @@ def main():
         "-c",
         help="File containing character setting (enable conversation mode)",
     )
-    parser.add_argument(
-        "--system",
-        "-s",
-        help="File containing system prompt",
-    )
     parser.add_argument("--max-tokens", "-m", default=2048, help="Max tokens")
     parser.add_argument(
         "--budget-tokens",
@@ -76,7 +71,7 @@ def main():
 
     client = anthropic.Anthropic()
     texts = []
-    system_prompt = Path(args.system).read_text() if args.system is not None else ""
+    system_prompt = ""
     character_setting = (
         Path(args.character).read_text() if args.character is not None else None
     )
