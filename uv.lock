@@ -70,17 +70,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dotenv"
-version = "0.9.9"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "python-dotenv" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/b7/545d2c10c1fc15e48653c91efde329a790f2eecfbbf2bd16003b5db2bab0/dotenv-0.9.9-py2.py3-none-any.whl", hash = "sha256:29cf74a087b31dafdb5a446b6d7e11cbce8ed2741540e2339c69fbef92c94ce9", size = 1892, upload-time = "2025-02-19T22:15:01.647Z" },
-]
-
-[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -165,7 +154,6 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
-    { name = "dotenv" },
     { name = "prompt-toolkit" },
 ]
 
@@ -178,7 +166,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anthropic", specifier = ">=0.79" },
-    { name = "dotenv", specifier = ">=0.9.9" },
     { name = "prompt-toolkit", specifier = ">=3.0.52" },
 ]
 
@@ -270,15 +257,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/87/d7/92bbc9f3d7ef37438303fca87a01a7fe5babfa6486eeddcff52e5d144922/pyproject_fmt-2.16.0-cp39-abi3-manylinux_2_31_riscv64.whl", hash = "sha256:18d3bf855983d804e18c72780b8ed23e687e60bff2c63a029082cef6b29f249d", size = 4709229, upload-time = "2026-02-12T22:30:58.197Z" },
     { url = "https://files.pythonhosted.org/packages/8f/21/9a57d1046a19d3ed710d35c01a2ff659aab52bbdfbe82319d4a33b4b7a5b/pyproject_fmt-2.16.0-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:11212586f360315a2e4ec5dceb5a82db189ef77df8930b030e1b83274ca04c1a", size = 5187940, upload-time = "2026-02-12T22:30:59.768Z" },
     { url = "https://files.pythonhosted.org/packages/e5/c2/13dd593c0302d367e466f0fcf82d924ad2f66d6f35b02d8b47c600dd3753/pyproject_fmt-2.16.0-cp39-abi3-win_amd64.whl", hash = "sha256:958fc2c6541abdb5ba226d6ba730b3b5de77982d55eb5a83abd43374725f58e9", size = 4828992, upload-time = "2026-02-12T22:31:01.335Z" },
-]
-
-[[package]]
-name = "python-dotenv"
-version = "1.2.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f0/26/19cadc79a718c5edbec86fd4919a6b6d3f681039a2f6d66d14be94e75fb9/python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6", size = 44221, upload-time = "2025-10-26T15:12:10.434Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/1b/a298b06749107c305e1fe0f814c6c74aea7b2f1e10989cb30f544a1b3253/python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61", size = 21230, upload-time = "2025-10-26T15:12:09.109Z" },
 ]
 
 [[package]]
