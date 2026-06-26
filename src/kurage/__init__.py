@@ -19,7 +19,6 @@ def _(event):
     event.current_buffer.validate_and_handle()
 
 
-
 def main():
     parser = ArgumentParser()
     parser.add_argument(
