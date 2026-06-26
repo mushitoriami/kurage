@@ -56,11 +56,6 @@ def main():
         help="Enable extended thinking",
     )
     parser.add_argument(
-        "--character",
-        "-c",
-        help="File containing character setting (enable conversation mode)",
-    )
-    parser.add_argument(
         "--system",
         "-s",
         help="File containing system prompt",
@@ -77,9 +72,7 @@ def main():
     client = anthropic.Anthropic()
     texts = []
     system_prompt = Path(args.system).read_text() if args.system is not None else ""
-    character_setting = (
-        Path(args.character).read_text() if args.character is not None else None
-    )
+    character_setting = None
     while True:
         print("\nUser:\n")
         try:
