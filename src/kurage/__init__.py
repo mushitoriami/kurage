@@ -20,9 +20,6 @@ def _(event):
     event.current_buffer.validate_and_handle()
 
 
-def construct_context(roles, texts):
-    return [{"role": role, "content": text} for role, text in zip(cycle(roles), texts)]
-
 
 def main():
     parser = ArgumentParser()
@@ -48,8 +45,8 @@ def main():
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
-    texts = []
-    system_prompt = Path(args.system).read_text() if args.system is not None else ""
+    messages = []
+    system = Path(args.system).read_text() if args.system is not None else ""
     while True:
         print("\nUser:\n")
         try:
@@ -58,11 +55,7 @@ def main():
             )
         except EOFError:
             break
-        texts.append(user_input)
-        system, messages = (
-            system_prompt,
-            construct_context(["user", "assistant"], texts),
-        )
+        messages.append({"role": "user", "content": user_input})
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=int(args.max_tokens),
@@ -79,4 +72,4 @@ def main():
             if block.type == "text":
                 print("\nAssistant:\n")
                 print(indent(block.text, "  | ", predicate=(lambda x: True)))
-                texts.append(block.text)
+        messages.append({"role": "assistant", "content": response.content})
