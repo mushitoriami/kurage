@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from itertools import cycle
 from pathlib import Path
 from textwrap import indent
 
