@@ -22,24 +22,11 @@ def _(event):
 def main():
     parser = ArgumentParser()
     parser.add_argument(
-        "--thinking",
-        "-t",
-        action="store_true",
-        default=False,
-        help="Enable extended thinking",
-    )
-    parser.add_argument(
         "--system",
         "-s",
         help="File containing system prompt",
     )
     parser.add_argument("--max-tokens", "-m", default=2048, help="Max tokens")
-    parser.add_argument(
-        "--budget-tokens",
-        "-b",
-        default=1024,
-        help="Budget tokens (for extended thinking)",
-    )
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
