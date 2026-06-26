@@ -26,7 +26,7 @@ def main():
         "-s",
         help="File containing system prompt",
     )
-    parser.add_argument("--max-tokens", "-m", default=2048, help="Max tokens")
+    parser.add_argument("--max-tokens", "-m", default=8192, help="Max tokens")
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
