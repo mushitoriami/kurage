@@ -55,7 +55,7 @@ def main():
             break
         messages.append({"role": "user", "content": user_input})
         response = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
+            model="claude-sonnet-4-6",
             max_tokens=int(args.max_tokens),
             system=system,
             thinking={"type": "enabled", "budget_tokens": int(args.budget_tokens)}
