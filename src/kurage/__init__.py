@@ -86,9 +86,12 @@ def main():
     )
     while True:
         print("\nUser:\n")
-        user_input = prompt(
-            "  | ", key_bindings=kb, multiline=True, prompt_continuation="  | "
-        )
+        try:
+            user_input = prompt(
+                "  | ", key_bindings=kb, multiline=True, prompt_continuation="  | "
+            )
+        except EOFError:
+            break
         texts.append(user_input)
         system, messages = construct_system_and_messages(
             texts, system_prompt, character_setting
