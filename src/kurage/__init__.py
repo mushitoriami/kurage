@@ -22,24 +22,11 @@ def _(event):
 def main():
     parser = ArgumentParser()
     parser.add_argument(
-        "--thinking",
-        "-t",
-        action="store_true",
-        default=False,
-        help="Enable extended thinking",
-    )
-    parser.add_argument(
         "--system",
         "-s",
         help="File containing system prompt",
     )
     parser.add_argument("--max-tokens", "-m", default=2048, help="Max tokens")
-    parser.add_argument(
-        "--budget-tokens",
-        "-b",
-        default=1024,
-        help="Budget tokens (for extended thinking)",
-    )
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
@@ -55,12 +42,10 @@ def main():
             break
         messages.append({"role": "user", "content": user_input})
         response = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
+            model="claude-sonnet-4-6",
             max_tokens=int(args.max_tokens),
             system=system,
-            thinking={"type": "enabled", "budget_tokens": int(args.budget_tokens)}
-            if args.thinking
-            else {"type": "disabled"},
+            thinking={"type": "adaptive"},
             messages=messages,
         )
         for block in response.content:
