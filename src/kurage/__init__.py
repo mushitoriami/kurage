@@ -1,22 +1,37 @@
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from textwrap import indent
 
 import anthropic
-from prompt_toolkit import prompt
-from prompt_toolkit.key_binding import KeyBindings
-
-kb = KeyBindings()
 
 
-@kb.add("c-j")
-def _(event):
-    event.current_buffer.insert_text("\n")
+def read_context():
+    messages = []
+    for line in sys.stdin:
+        if line.startswith("user:"):
+            messages.append({"role": "user", "content": line[len("user:") :].lstrip()})
+        elif line.startswith("assistant:"):
+            messages.append(
+                {"role": "assistant", "content": line[len("assistant:") :].lstrip()}
+            )
+        elif line.startswith("  "):
+            messages[-1]["content"] += line[len("  ") :]
+        elif line.strip() == "":
+            messages[-1]["content"] += "\n"
+        else:
+            raise ValueError
+    return messages
 
 
-@kb.add("enter")
-def _(event):
-    event.current_buffer.validate_and_handle()
+def write_context(messages):
+    for message in messages:
+        role, content = message["role"], message["content"].rstrip()
+        if "\n" not in content:
+            print(f"{role}: {content}")
+        else:
+            print(f"{role}: ")
+            print(indent(content, "  "))
 
 
 def main():
@@ -30,17 +45,9 @@ def main():
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
-    messages = []
+    messages = read_context()
     system = Path(args.system).read_text() if args.system is not None else ""
-    while True:
-        print("\nUser:\n")
-        try:
-            user_input = prompt(
-                "  | ", key_bindings=kb, multiline=True, prompt_continuation="  | "
-            )
-        except EOFError:
-            break
-        messages.append({"role": "user", "content": user_input})
+    if messages:
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=int(args.max_tokens),
@@ -49,10 +56,7 @@ def main():
             messages=messages,
         )
         for block in response.content:
-            if block.type == "thinking":
-                print("\nAssistant [Thinking]:\n")
-                print(indent(block.thinking, "  | ", predicate=(lambda x: True)))
             if block.type == "text":
-                print("\nAssistant:\n")
-                print(indent(block.text, "  | ", predicate=(lambda x: True)))
-        messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "assistant", "content": block.text})
+        write_context(messages)
+    print("user: ")
