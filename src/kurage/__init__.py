@@ -46,15 +46,16 @@ def main():
 
     client = anthropic.Anthropic()
     messages = read_context()
-    system = Path(args.system).read_text() if args.system is not None else ""
     if messages:
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=args.max_tokens,
-            system=system,
-            thinking={"type": "adaptive"},
-            messages=messages,
-        )
+        kwargs = {
+            "model": "claude-sonnet-4-6",
+            "max_tokens": args.max_tokens,
+            "thinking": {"type": "adaptive"},
+            "messages": messages,
+        }
+        if args.system is not None:
+            kwargs["system"] = Path(args.system).read_text()
+        response = client.messages.create(**kwargs)
         for block in response.content:
             if block.type == "text":
                 messages.append({"role": "assistant", "content": block.text})
