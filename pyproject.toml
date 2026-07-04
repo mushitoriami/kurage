@@ -14,7 +14,7 @@ classifiers = [
 ]
 dependencies = [
   "anthropic>=0.79",
-  "openai>=2.44.0",
+  "openai>=2.44",
 ]
 scripts.kurage = "kurage:main"
 
