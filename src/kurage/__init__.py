@@ -6,7 +6,7 @@ from textwrap import indent
 import anthropic
 
 
-def chat(messages, system):
+def chat_anthropic(messages, system):
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
@@ -56,10 +56,16 @@ def main():
         "-s",
         help="File containing system prompt",
     )
+    parser.add_argument(
+        "--provider", "-p", default="Anthropic", choices=("Anthropic",), help="Provider"
+    )
     args = parser.parse_args()
     messages = read_context()
     system = Path(args.system).read_text() if args.system is not None else ""
     if messages:
-        messages = chat(messages, system)
+        if args.provider == "Anthropic":
+            messages = chat_anthropic(messages, system)
+        else:
+            raise ValueError
         write_context(messages)
     print("user: ")
