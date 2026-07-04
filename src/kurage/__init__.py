@@ -4,6 +4,7 @@ from pathlib import Path
 from textwrap import indent
 
 import anthropic
+import openai
 
 
 def chat_anthropic(messages, system):
@@ -18,6 +19,17 @@ def chat_anthropic(messages, system):
     for block in response.content:
         if block.type == "text":
             messages.append({"role": "assistant", "content": block.text})
+    return messages
+
+
+def chat_openai(messages, _system):
+    client = openai.OpenAI()
+    response = client.chat.completions.create(
+        model="gpt-5.4-2026-03-05", messages=messages
+    )
+    messages.append(
+        {"role": "assistant", "content": response.choices[0].message.content}
+    )
     return messages
 
 
@@ -57,7 +69,11 @@ def main():
         help="File containing system prompt",
     )
     parser.add_argument(
-        "--provider", "-p", default="Anthropic", choices=("Anthropic",), help="Provider"
+        "--provider",
+        "-p",
+        default="Anthropic",
+        choices=("Anthropic", "OpenAI"),
+        help="Provider",
     )
     args = parser.parse_args()
     messages = read_context()
@@ -65,6 +81,8 @@ def main():
     if messages:
         if args.provider == "Anthropic":
             messages = chat_anthropic(messages, system)
+        elif args.provider == "OpenAI":
+            messages = chat_openai(messages, system)
         else:
             raise ValueError
         write_context(messages)
