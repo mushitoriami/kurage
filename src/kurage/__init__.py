@@ -2,19 +2,22 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from textwrap import indent
+from typing import TextIO
 
 import anthropic
 import openai
 
+type Messages = list[dict[str, str]]
 
-def chat_anthropic(messages, system):
+
+def chat_anthropic(messages: Messages, system: str) -> Messages:
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=8192,
         system=system,
         thinking={"type": "adaptive"},
-        messages=messages,
+        messages=messages,  # type: ignore[reportArgumentType]
     )
     for block in response.content:
         if block.type == "text":
@@ -22,19 +25,20 @@ def chat_anthropic(messages, system):
     return messages
 
 
-def chat_openai(messages, _system):
+def chat_openai(messages: Messages, _system: str) -> Messages:
     client = openai.OpenAI()
     response = client.chat.completions.create(
-        model="gpt-5.4-2026-03-05", messages=messages
+        model="gpt-5.4-2026-03-05",
+        messages=messages,  # type: ignore[reportArgumentType]
     )
-    messages.append(
-        {"role": "assistant", "content": response.choices[0].message.content}
-    )
+    text = response.choices[0].message.content
+    assert isinstance(text, str)
+    messages.append({"role": "assistant", "content": text})
     return messages
 
 
-def loads_conversation(string):
-    messages = []
+def loads_conversation(string: str) -> Messages:
+    messages: Messages = []
     for line in string.splitlines(keepends=True):
         if line.startswith("user:"):
             messages.append({"role": "user", "content": line[len("user:") :].lstrip()})
@@ -51,11 +55,11 @@ def loads_conversation(string):
     return messages
 
 
-def load_conversation(fp=sys.stdin):
+def load_conversation(fp: TextIO = sys.stdin):
     return loads_conversation(fp.read())
 
 
-def dumps_conversation(messages):
+def dumps_conversation(messages: Messages) -> str:
     string = ""
     for message in messages:
         role, content = message["role"], message["content"].rstrip()
@@ -66,7 +70,7 @@ def dumps_conversation(messages):
     return string
 
 
-def dump_conversation(messages, fp=sys.stdout):
+def dump_conversation(messages: Messages, fp: TextIO = sys.stdout):
     fp.write(dumps_conversation(messages))
 
 
