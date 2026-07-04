@@ -6,6 +6,21 @@ from textwrap import indent
 import anthropic
 
 
+def chat(messages, system):
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=8192,
+        system=system,
+        thinking={"type": "adaptive"},
+        messages=messages,
+    )
+    for block in response.content:
+        if block.type == "text":
+            messages.append({"role": "assistant", "content": block.text})
+    return messages
+
+
 def read_context():
     messages = []
     for line in sys.stdin:
@@ -42,20 +57,9 @@ def main():
         help="File containing system prompt",
     )
     args = parser.parse_args()
-
-    client = anthropic.Anthropic()
     messages = read_context()
     system = Path(args.system).read_text() if args.system is not None else ""
     if messages:
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=8192,
-            system=system,
-            thinking={"type": "adaptive"},
-            messages=messages,
-        )
-        for block in response.content:
-            if block.type == "text":
-                messages.append({"role": "assistant", "content": block.text})
+        messages = chat(messages, system)
         write_context(messages)
     print("user: ")
