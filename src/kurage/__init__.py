@@ -33,9 +33,9 @@ def chat_openai(messages, _system):
     return messages
 
 
-def load_conversation(fp=sys.stdin):
+def loads_conversation(string):
     messages = []
-    for line in fp:
+    for line in string.splitlines(keepends=True):
         if line.startswith("user:"):
             messages.append({"role": "user", "content": line[len("user:") :].lstrip()})
         elif line.startswith("assistant:"):
@@ -51,14 +51,23 @@ def load_conversation(fp=sys.stdin):
     return messages
 
 
-def dump_conversation(messages, fp=sys.stdout):
+def load_conversation(fp=sys.stdin):
+    return loads_conversation(fp.read())
+
+
+def dumps_conversation(messages):
+    string = ""
     for message in messages:
         role, content = message["role"], message["content"].rstrip()
         if "\n" not in content:
-            print(f"{role}: {content}", file=fp)
+            string += f"{role}: {content}\n"
         else:
-            print(f"{role}: ", file=fp)
-            print(indent(content, "  "), file=fp)
+            string += f"{role}: \n" + indent(content, "  ") + "\n"
+    return string
+
+
+def dump_conversation(messages, fp=sys.stdout):
+    fp.write(dumps_conversation(messages))
 
 
 def main():
