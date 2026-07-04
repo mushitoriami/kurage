@@ -41,7 +41,6 @@ def main():
         "-s",
         help="File containing system prompt",
     )
-    parser.add_argument("--max-tokens", "-m", default=8192, type=int, help="Max tokens")
     args = parser.parse_args()
 
     client = anthropic.Anthropic()
@@ -50,7 +49,7 @@ def main():
     if messages:
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=args.max_tokens,
+            max_tokens=8192,
             system=system,
             thinking={"type": "adaptive"},
             messages=messages,
