@@ -33,9 +33,9 @@ def chat_openai(messages, _system):
     return messages
 
 
-def read_context():
+def load_conversation(fp=sys.stdin):
     messages = []
-    for line in sys.stdin:
+    for line in fp:
         if line.startswith("user:"):
             messages.append({"role": "user", "content": line[len("user:") :].lstrip()})
         elif line.startswith("assistant:"):
@@ -51,14 +51,14 @@ def read_context():
     return messages
 
 
-def write_context(messages):
+def dump_conversation(messages, fp=sys.stdout):
     for message in messages:
         role, content = message["role"], message["content"].rstrip()
         if "\n" not in content:
-            print(f"{role}: {content}")
+            print(f"{role}: {content}", file=fp)
         else:
-            print(f"{role}: ")
-            print(indent(content, "  "))
+            print(f"{role}: ", file=fp)
+            print(indent(content, "  "), file=fp)
 
 
 def main():
@@ -76,7 +76,7 @@ def main():
         help="Provider",
     )
     args = parser.parse_args()
-    messages = read_context()
+    messages = load_conversation()
     system = Path(args.system).read_text() if args.system is not None else ""
     if messages:
         if args.provider == "Anthropic":
@@ -85,5 +85,5 @@ def main():
             messages = chat_openai(messages, system)
         else:
             raise ValueError
-        write_context(messages)
+        dump_conversation(messages)
     print("user: ")
