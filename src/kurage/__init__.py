@@ -4,6 +4,33 @@ from pathlib import Path
 from textwrap import indent
 
 import anthropic
+import openai
+
+
+def chat_anthropic(messages, system):
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=8192,
+        system=system,
+        thinking={"type": "adaptive"},
+        messages=messages,
+    )
+    for block in response.content:
+        if block.type == "text":
+            messages.append({"role": "assistant", "content": block.text})
+    return messages
+
+
+def chat_openai(messages, _system):
+    client = openai.OpenAI()
+    response = client.chat.completions.create(
+        model="gpt-5.4-2026-03-05", messages=messages
+    )
+    messages.append(
+        {"role": "assistant", "content": response.choices[0].message.content}
+    )
+    return messages
 
 
 def read_context():
@@ -41,22 +68,22 @@ def main():
         "-s",
         help="File containing system prompt",
     )
-    parser.add_argument("--max-tokens", "-m", default=8192, type=int, help="Max tokens")
+    parser.add_argument(
+        "--provider",
+        "-p",
+        default="Anthropic",
+        choices=("Anthropic", "OpenAI"),
+        help="Provider",
+    )
     args = parser.parse_args()
-
-    client = anthropic.Anthropic()
     messages = read_context()
     system = Path(args.system).read_text() if args.system is not None else ""
     if messages:
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=args.max_tokens,
-            system=system,
-            thinking={"type": "adaptive"},
-            messages=messages,
-        )
-        for block in response.content:
-            if block.type == "text":
-                messages.append({"role": "assistant", "content": block.text})
+        if args.provider == "Anthropic":
+            messages = chat_anthropic(messages, system)
+        elif args.provider == "OpenAI":
+            messages = chat_openai(messages, system)
+        else:
+            raise ValueError
         write_context(messages)
     print("user: ")
