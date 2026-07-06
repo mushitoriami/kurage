@@ -5,7 +5,7 @@ requires = [ "uv-build>=0.9.28,<0.10" ]
 [project]
 name = "kurage"
 version = "0.1.0"
-description = "A simple chat interface using API"
+description = "A simple chat interface using Anthropic/OpenAI API"
 readme = "README.md"
 requires-python = ">=3.14"
 classifiers = [
