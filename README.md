@@ -1,3 +1,3 @@
 # kurage
 
-A simple chat interface using Claude API
+A simple chat interface using Anthropic/OpenAI API
