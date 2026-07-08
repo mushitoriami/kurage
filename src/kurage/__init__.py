@@ -10,7 +10,7 @@ import openai
 type Messages = list[dict[str, str]]
 
 
-def chat_anthropic(messages: Messages, system: str) -> Messages:
+def chat_anthropic(messages: Messages, system: str):
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
@@ -25,7 +25,7 @@ def chat_anthropic(messages: Messages, system: str) -> Messages:
     return messages
 
 
-def chat_openai(messages: Messages, _system: str) -> Messages:
+def chat_openai(messages: Messages, _system: str):
     client = openai.OpenAI()
     response = client.chat.completions.create(
         model="gpt-5.4-2026-03-05",
@@ -37,7 +37,7 @@ def chat_openai(messages: Messages, _system: str) -> Messages:
     return messages
 
 
-def loads_conversation(string: str) -> Messages:
+def loads_conversation(string: str):
     messages: Messages = []
     for line in string.splitlines(keepends=True):
         if line.startswith("user:"):
@@ -59,7 +59,7 @@ def load_conversation(fp: TextIO = sys.stdin):
     return loads_conversation(fp.read())
 
 
-def dumps_conversation(messages: Messages) -> str:
+def dumps_conversation(messages: Messages):
     string = ""
     for message in messages:
         role, content = message["role"], message["content"].rstrip()
