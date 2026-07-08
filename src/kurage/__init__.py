@@ -2,19 +2,22 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from textwrap import indent
+from typing import TextIO
 
 import anthropic
 import openai
 
+type Messages = list[dict[str, str]]
 
-def chat_anthropic(messages, system):
+
+def chat_anthropic(messages: Messages, system: str):
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=8192,
         system=system,
         thinking={"type": "adaptive"},
-        messages=messages,
+        messages=messages,  # type: ignore[reportArgumentType]
     )
     for block in response.content:
         if block.type == "text":
@@ -22,20 +25,21 @@ def chat_anthropic(messages, system):
     return messages
 
 
-def chat_openai(messages, _system):
+def chat_openai(messages: Messages, _system: str):
     client = openai.OpenAI()
     response = client.chat.completions.create(
-        model="gpt-5.4-2026-03-05", messages=messages
+        model="gpt-5.4-2026-03-05",
+        messages=messages,  # type: ignore[reportArgumentType]
     )
-    messages.append(
-        {"role": "assistant", "content": response.choices[0].message.content}
-    )
+    text = response.choices[0].message.content
+    assert isinstance(text, str)
+    messages.append({"role": "assistant", "content": text})
     return messages
 
 
-def read_context():
-    messages = []
-    for line in sys.stdin:
+def loads_conversation(string: str):
+    messages: Messages = []
+    for line in string.splitlines(keepends=True):
         if line.startswith("user:"):
             messages.append({"role": "user", "content": line[len("user:") :].lstrip()})
         elif line.startswith("assistant:"):
@@ -51,14 +55,23 @@ def read_context():
     return messages
 
 
-def write_context(messages):
+def load_conversation(fp: TextIO = sys.stdin):
+    return loads_conversation(fp.read())
+
+
+def dumps_conversation(messages: Messages):
+    string = ""
     for message in messages:
         role, content = message["role"], message["content"].rstrip()
         if "\n" not in content:
-            print(f"{role}: {content}")
+            string += f"{role}: {content}\n"
         else:
-            print(f"{role}: ")
-            print(indent(content, "  "))
+            string += f"{role}: \n" + indent(content, "  ") + "\n"
+    return string
+
+
+def dump_conversation(messages: Messages, fp: TextIO = sys.stdout):
+    fp.write(dumps_conversation(messages))
 
 
 def main():
@@ -76,7 +89,7 @@ def main():
         help="Provider",
     )
     args = parser.parse_args()
-    messages = read_context()
+    messages = load_conversation()
     system = Path(args.system).read_text() if args.system is not None else ""
     if messages:
         if args.provider == "Anthropic":
@@ -85,5 +98,5 @@ def main():
             messages = chat_openai(messages, system)
         else:
             raise ValueError
-        write_context(messages)
+        dump_conversation(messages)
     print("user: ")
