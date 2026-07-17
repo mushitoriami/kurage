@@ -22,7 +22,7 @@ def chat_anthropic(question: str, system: str | None) -> str:
     for block in response.content:
         if block.type == "text":
             return block.text
-    raise NotImplementedError
+    raise RuntimeError("Anthropic response contained no text block")
 
 
 def chat_openai(question: str, system: str | None) -> str:
@@ -37,7 +37,7 @@ def chat_openai(question: str, system: str | None) -> str:
     )
     text = response.choices[0].message.content
     if text is None:
-        raise NotImplementedError
+        raise RuntimeError("OpenAI response contained no text")
     return text
 
 
