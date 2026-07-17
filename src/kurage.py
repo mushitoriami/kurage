@@ -10,31 +10,31 @@ import openai
 type Messages = list[dict[str, str]]
 
 
-def chat_anthropic(messages: Messages, system: str):
+def chat_anthropic(question: str, system: str):
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=8192,
         system=system,
         thinking={"type": "adaptive"},
-        messages=messages,  # type: ignore[reportArgumentType]
+        messages=[{"role": "user", "content": question}],
     )
     for block in response.content:
         if block.type == "text":
-            messages.append({"role": "assistant", "content": block.text})
-    return messages
+            return block.text
+    raise NotImplementedError
 
 
-def chat_openai(messages: Messages, _system: str):
+def chat_openai(question: str, _system: str):
     client = openai.OpenAI()
     response = client.chat.completions.create(
         model="gpt-5.4-2026-03-05",
-        messages=messages,  # type: ignore[reportArgumentType]
+        messages=[{"role": "user", "content": question}],
     )
     text = response.choices[0].message.content
-    assert isinstance(text, str)
-    messages.append({"role": "assistant", "content": text})
-    return messages
+    if text is None:
+        raise NotImplementedError
+    return text
 
 
 def loads_conversation(string: str):
@@ -89,14 +89,12 @@ def main():
         help="Provider",
     )
     args = parser.parse_args()
-    messages = load_conversation()
+    question = sys.stdin.read()
     system = Path(args.system).read_text() if args.system is not None else ""
-    if messages:
-        if args.provider == "Anthropic":
-            messages = chat_anthropic(messages, system)
-        elif args.provider == "OpenAI":
-            messages = chat_openai(messages, system)
-        else:
-            raise ValueError
-        dump_conversation(messages)
-    print("user: ")
+    if args.provider == "Anthropic":
+        answer = chat_anthropic(question, system)
+    elif args.provider == "OpenAI":
+        answer = chat_openai(question, system)
+    else:
+        raise ValueError
+    print(answer)
