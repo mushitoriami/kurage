@@ -6,7 +6,7 @@ import anthropic
 import openai
 
 
-def chat_anthropic(question: str, system: str):
+def chat_anthropic(question: str, system: str) -> str:
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
@@ -21,7 +21,7 @@ def chat_anthropic(question: str, system: str):
     raise NotImplementedError
 
 
-def chat_openai(question: str, _system: str):
+def chat_openai(question: str, system: str) -> str:
     client = openai.OpenAI()
     response = client.chat.completions.create(
         model="gpt-5.4-2026-03-05",
@@ -33,7 +33,7 @@ def chat_openai(question: str, _system: str):
     return text
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser()
     parser.add_argument(
         "--system",
