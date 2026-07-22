@@ -1,6 +1,7 @@
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Literal
 
 import anthropic
 import openai
@@ -51,12 +52,12 @@ def main() -> None:
         help="Provider",
     )
     args = parser.parse_args()
+    provider: Literal["Anthropic", "OpenAI"] = args.provider
     question = sys.stdin.read()
     system = Path(args.system).read_text() if args.system is not None else ""
-    if args.provider == "Anthropic":
-        answer = chat_anthropic(question, system)
-    elif args.provider == "OpenAI":
-        answer = chat_openai(question, system)
-    else:
-        raise ValueError
+    match provider:
+        case "Anthropic":
+            answer = chat_anthropic(question, system)
+        case "OpenAI":
+            answer = chat_openai(question, system)
     print(answer)
