@@ -25,7 +25,10 @@ def chat_openai(question: str, system: str) -> str:
     client = openai.OpenAI()
     response = client.chat.completions.create(
         model="gpt-5.4-2026-03-05",
-        messages=[{"role": "user", "content": question}],
+        messages=[
+            {"role": "developer", "content": system},
+            {"role": "user", "content": question},
+        ],
     )
     text = response.choices[0].message.content
     if text is None:
