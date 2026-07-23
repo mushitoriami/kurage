@@ -5,14 +5,15 @@ from typing import Literal
 
 import anthropic
 import openai
+from openai.types.chat import ChatCompletionMessageParam
 
 
-def chat_anthropic(question: str, system: str) -> str:
+def chat_anthropic(question: str, system: str | None) -> str:
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=8192,
-        system=system,
+        system=system if system is not None else anthropic.omit,
         thinking={"type": "adaptive"},
         messages=[{"role": "user", "content": question}],
     )
@@ -22,14 +23,15 @@ def chat_anthropic(question: str, system: str) -> str:
     raise NotImplementedError
 
 
-def chat_openai(question: str, system: str) -> str:
+def chat_openai(question: str, system: str | None) -> str:
     client = openai.OpenAI()
+    messages: list[ChatCompletionMessageParam] = []
+    if system is not None:
+        messages.append({"role": "developer", "content": system})
+    messages.append({"role": "user", "content": question})
     response = client.chat.completions.create(
         model="gpt-5.4-2026-03-05",
-        messages=[
-            {"role": "developer", "content": system},
-            {"role": "user", "content": question},
-        ],
+        messages=messages,
     )
     text = response.choices[0].message.content
     if text is None:
@@ -54,7 +56,7 @@ def main() -> None:
     args = parser.parse_args()
     provider: Literal["Anthropic", "OpenAI"] = args.provider
     question = sys.stdin.read()
-    system = Path(args.system).read_text() if args.system is not None else ""
+    system = Path(args.system).read_text() if args.system is not None else None
     match provider:
         case "Anthropic":
             answer = chat_anthropic(question, system)
