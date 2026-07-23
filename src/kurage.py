@@ -1,11 +1,13 @@
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Literal
+from typing import Literal, get_args
 
 import anthropic
 import openai
 from openai.types.chat import ChatCompletionMessageParam
+
+Provider = Literal["Anthropic", "OpenAI"]
 
 
 def chat_anthropic(question: str, system: str | None) -> str:
@@ -50,11 +52,11 @@ def main() -> None:
         "--provider",
         "-p",
         default="Anthropic",
-        choices=("Anthropic", "OpenAI"),
+        choices=get_args(Provider),
         help="Provider",
     )
     args = parser.parse_args()
-    provider: Literal["Anthropic", "OpenAI"] = args.provider
+    provider: Provider = args.provider
     question = sys.stdin.read()
     system = Path(args.system).read_text() if args.system is not None else None
     match provider:
