@@ -1,5 +1,6 @@
 import sys
 from argparse import ArgumentParser
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Literal, get_args
 
@@ -10,7 +11,7 @@ from openai.types.chat import ChatCompletionMessageParam
 Provider = Literal["Anthropic", "OpenAI"]
 
 
-def chat_anthropic(question: str, system: str | None) -> str:
+def chat_anthropic(question: str, system: str | None) -> Iterator[str]:
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-sonnet-4-6",
@@ -21,11 +22,12 @@ def chat_anthropic(question: str, system: str | None) -> str:
     )
     for block in response.content:
         if block.type == "text":
-            return block.text
+            yield block.text
+            return
     raise RuntimeError("Anthropic response contained no text block")
 
 
-def chat_openai(question: str, system: str | None) -> str:
+def chat_openai(question: str, system: str | None) -> Iterator[str]:
     client = openai.OpenAI()
     messages: list[ChatCompletionMessageParam] = []
     if system is not None:
@@ -38,7 +40,7 @@ def chat_openai(question: str, system: str | None) -> str:
     text = response.choices[0].message.content
     if text is None:
         raise RuntimeError("OpenAI response contained no text")
-    return text
+    yield text
 
 
 def main() -> None:
@@ -64,4 +66,7 @@ def main() -> None:
             answer = chat_anthropic(question, system)
         case "OpenAI":
             answer = chat_openai(question, system)
-    print(answer)
+    for chunk in answer:
+        sys.stdout.write(chunk)
+        sys.stdout.flush()
+    print()
