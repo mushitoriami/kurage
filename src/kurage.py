@@ -1,3 +1,4 @@
+import logging
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -8,6 +9,15 @@ import openai
 from openai.types.chat import ChatCompletionMessageParam
 
 Provider = Literal["Anthropic", "OpenAI"]
+
+
+def enable_debug_logging() -> None:
+    logging.basicConfig(
+        format="[%(asctime)s - %(name)s:%(lineno)d - %(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    for name in ("anthropic", "openai", "httpx"):
+        logging.getLogger(name).setLevel(logging.DEBUG)
 
 
 def chat_anthropic(question: str, system: str | None) -> str:
@@ -55,7 +65,15 @@ def main() -> None:
         choices=get_args(Provider),
         help="Provider",
     )
+    parser.add_argument(
+        "--debug",
+        "-d",
+        action="store_true",
+        help="Log HTTP request/response details to stderr",
+    )
     args = parser.parse_args()
+    if args.debug:
+        enable_debug_logging()
     provider: Provider = args.provider
     question = sys.stdin.read()
     system = Path(args.system).read_text() if args.system is not None else None
