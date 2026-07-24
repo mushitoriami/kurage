@@ -15,7 +15,7 @@ def chat_anthropic(question: str, system: str | None) -> Iterator[str]:
     client = anthropic.Anthropic()
     with client.messages.stream(
         model="claude-sonnet-4-6",
-        max_tokens=8192,
+        max_tokens=128000,
         system=system if system is not None else anthropic.omit,
         thinking={"type": "adaptive"},
         messages=[{"role": "user", "content": question}],
