@@ -13,18 +13,14 @@ Provider = Literal["Anthropic", "OpenAI"]
 
 def chat_anthropic(question: str, system: str | None) -> Iterator[str]:
     client = anthropic.Anthropic()
-    response = client.messages.create(
+    with client.messages.stream(
         model="claude-sonnet-4-6",
         max_tokens=8192,
         system=system if system is not None else anthropic.omit,
         thinking={"type": "adaptive"},
         messages=[{"role": "user", "content": question}],
-    )
-    for block in response.content:
-        if block.type == "text":
-            yield block.text
-            return
-    raise RuntimeError("Anthropic response contained no text block")
+    ) as stream:
+        yield from stream.text_stream
 
 
 def chat_openai(question: str, system: str | None) -> Iterator[str]:
@@ -33,14 +29,15 @@ def chat_openai(question: str, system: str | None) -> Iterator[str]:
     if system is not None:
         messages.append({"role": "developer", "content": system})
     messages.append({"role": "user", "content": question})
-    response = client.chat.completions.create(
+    stream = client.chat.completions.create(
         model="gpt-5.4-2026-03-05",
         messages=messages,
+        stream=True,
     )
-    text = response.choices[0].message.content
-    if text is None:
-        raise RuntimeError("OpenAI response contained no text")
-    yield text
+    for chunk in stream:
+        content = chunk.choices[0].delta.content
+        if content is not None:
+            yield content
 
 
 def main() -> None:
