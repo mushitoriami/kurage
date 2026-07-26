@@ -1,0 +1,21 @@
+import os
+
+import pytest
+
+from kurage import chat_anthropic, chat_openai
+
+
+@pytest.mark.skipif(
+    not os.environ.get("ANTHROPIC_API_KEY"), reason="ANTHROPIC_API_KEY not set"
+)
+def test_chat_anthropic_streams_text() -> None:
+    chunks = list(chat_anthropic("Reply with exactly the word: pong", None))
+    assert "pong" in "".join(chunks).lower()
+
+
+@pytest.mark.skipif(
+    not os.environ.get("OPENAI_API_KEY"), reason="OPENAI_API_KEY not set"
+)
+def test_chat_openai_streams_text() -> None:
+    chunks = list(chat_openai("Reply with exactly the word: pong", None))
+    assert "pong" in "".join(chunks).lower()
