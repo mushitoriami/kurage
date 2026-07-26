@@ -5,7 +5,7 @@ requires = [ "setuptools>=42" ]
 [project]
 name = "kurage"
 version = "0.1.0"
-description = "A simple chat interface using Anthropic/OpenAI API"
+description = "A simple chat interface using Anthropic/OpenAI/Gemini API"
 readme = "README.md"
 requires-python = ">=3.14"
 classifiers = [
@@ -14,6 +14,7 @@ classifiers = [
 ]
 dependencies = [
   "anthropic>=0.79",
+  "google-genai>=2.14",
   "openai>=2.44",
 ]
 scripts.kurage = "kurage:main"
@@ -39,9 +40,12 @@ env.format_pyproject.description = "Check pyproject.toml format"
 env.format_pyproject.commands = [ [ "pyproject-fmt", "--check", "pyproject.toml" ] ]
 env.lint.description = "Lint"
 env.lint.commands = [ [ "ruff", "check" ] ]
-env.test.description = "Run tests that make real API calls (needs ANTHROPIC_API_KEY/OPENAI_API_KEY; not part of the default tox run)"
+env.test.description = """\
+  Run tests that make real API calls (needs ANTHROPIC_API_KEY/GEMINI_API_KEY/OPENAI_API_KEY; not part of the default \
+  tox run)\
+  """
 env.test.commands = [ [ "pytest" ] ]
-env.test.pass_env = [ "ANTHROPIC_API_KEY", "OPENAI_API_KEY" ]
+env.test.pass_env = [ "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY" ]
 env.type.description = "Run type checks"
 env.type.commands = [ [ "pyright" ] ]
 env_run_base.dependency_groups = [ "dev" ]

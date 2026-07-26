@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from kurage import chat_anthropic, chat_openai
+from kurage import chat_anthropic, chat_gemini, chat_openai
 
 
 @pytest.mark.skipif(
@@ -10,6 +10,14 @@ from kurage import chat_anthropic, chat_openai
 )
 def test_chat_anthropic_streams_text() -> None:
     chunks = list(chat_anthropic("Reply with exactly the word: pong", None))
+    assert "pong" in "".join(chunks).lower()
+
+
+@pytest.mark.skipif(
+    not os.environ.get("GEMINI_API_KEY"), reason="GEMINI_API_KEY not set"
+)
+def test_chat_gemini_streams_text() -> None:
+    chunks = list(chat_gemini("Reply with exactly the word: pong", None))
     assert "pong" in "".join(chunks).lower()
 
 
