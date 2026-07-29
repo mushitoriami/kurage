@@ -22,6 +22,7 @@ scripts.kurage = "kurage:main"
 dev = [
   "pyproject-fmt>=2.16,<2.17",
   "pyright>=1.1.411",
+  "pytest>=8.3",
   "ruff>=0.15.1",
 ]
 
@@ -38,6 +39,9 @@ env.format_pyproject.description = "Check pyproject.toml format"
 env.format_pyproject.commands = [ [ "pyproject-fmt", "--check", "pyproject.toml" ] ]
 env.lint.description = "Lint"
 env.lint.commands = [ [ "ruff", "check" ] ]
+env.test.description = "Run tests that make real API calls (needs ANTHROPIC_API_KEY/OPENAI_API_KEY; not part of the default tox run)"
+env.test.commands = [ [ "pytest" ] ]
+env.test.pass_env = [ "ANTHROPIC_API_KEY", "OPENAI_API_KEY" ]
 env.type.description = "Run type checks"
 env.type.commands = [ [ "pyright" ] ]
 env_run_base.dependency_groups = [ "dev" ]
