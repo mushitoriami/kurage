@@ -1,3 +1,3 @@
 # kurage
 
-A simple chat interface using Anthropic/OpenAI API
+A simple chat interface using Anthropic/OpenAI/Gemini API

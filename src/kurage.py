@@ -6,9 +6,11 @@ from typing import Literal, get_args
 
 import anthropic
 import openai
+from google import genai
+from google.genai import types as genai_types
 from openai.types.chat import ChatCompletionMessageParam
 
-Provider = Literal["Anthropic", "OpenAI"]
+Provider = Literal["Anthropic", "Gemini", "OpenAI"]
 
 
 def chat_anthropic(question: str, system: str | None) -> Iterator[str]:
@@ -21,6 +23,22 @@ def chat_anthropic(question: str, system: str | None) -> Iterator[str]:
         messages=[{"role": "user", "content": question}],
     ) as stream:
         yield from stream.text_stream
+
+
+def chat_gemini(question: str, system: str | None) -> Iterator[str]:
+    client = genai.Client()
+    config = (
+        genai_types.GenerateContentConfig(system_instruction=system)
+        if system is not None
+        else None
+    )
+    for chunk in client.models.generate_content_stream(  # pyright: ignore[reportUnknownMemberType]
+        model="gemini-3.6-flash",
+        contents=question,
+        config=config,
+    ):
+        if chunk.text:
+            yield chunk.text
 
 
 def chat_openai(question: str, system: str | None) -> Iterator[str]:
@@ -61,6 +79,8 @@ def main() -> None:
     match provider:
         case "Anthropic":
             answer = chat_anthropic(question, system)
+        case "Gemini":
+            answer = chat_gemini(question, system)
         case "OpenAI":
             answer = chat_openai(question, system)
     for chunk in answer:
