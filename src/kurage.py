@@ -23,14 +23,14 @@ def chat_anthropic(question: str, system: str | None) -> Iterator[str]:
         messages=[{"role": "user", "content": question}],
     ) as stream:
         yield from stream.text_stream
+        if (stop_reason := stream.get_final_message().stop_reason) != "end_turn":
+            raise RuntimeError(f"Anthropic response did not finish normally: {stop_reason}")
 
 
 def chat_gemini(question: str, system: str | None) -> Iterator[str]:
     client = genai.Client()
     config = (
-        genai_types.GenerateContentConfig(system_instruction=system)
-        if system is not None
-        else None
+        genai_types.GenerateContentConfig(system_instruction=system) if system is not None else None
     )
     for chunk in client.models.generate_content_stream(  # pyright: ignore[reportUnknownMemberType]
         model="gemini-3.6-flash",
@@ -39,6 +39,9 @@ def chat_gemini(question: str, system: str | None) -> Iterator[str]:
     ):
         if chunk.text:
             yield chunk.text
+        finish_reason = chunk.candidates[0].finish_reason if chunk.candidates else None
+        if finish_reason not in (None, genai_types.FinishReason.STOP):
+            raise RuntimeError(f"Gemini response did not finish normally: {finish_reason}")
 
 
 def chat_openai(question: str, system: str | None) -> Iterator[str]:
@@ -53,9 +56,11 @@ def chat_openai(question: str, system: str | None) -> Iterator[str]:
         stream=True,
     )
     for chunk in stream:
-        content = chunk.choices[0].delta.content
-        if content is not None:
-            yield content
+        choice = chunk.choices[0]
+        if choice.delta.content is not None:
+            yield choice.delta.content
+        if choice.finish_reason not in (None, "stop"):
+            raise RuntimeError(f"OpenAI response did not finish normally: {choice.finish_reason}")
 
 
 def main() -> None:
